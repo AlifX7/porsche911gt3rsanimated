@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Porsche 911 GT3 RS | Performance Redefined</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;400;600;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="./style.css">
+  
+  <!-- Standalone GSAP & Lenis via CDN -->
+  <script src="https://unpkg.com/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script src="https://unpkg.com/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+
+</head>
+<body>
+
+  <!-- Loading Screen -->
+  <div id="loading" class="loading-overlay">
+    <div class="spinner"></div>
+    <div class="loading-text">LOADING SEQUENCE</div>
+  </div>
+
+  <main class="scroll-container">
+    
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="logo">PORSCHE</div>
+      <div class="nav-links">
+        <span class="nav-models">MODELS</span>
+        <span class="nav-motorsport">MOTORSPORT</span>
+        <span class="nav-configure">CONFIGURE</span>
+      </div>
+      <div class="menu-icon">
+        <div class="bar"></div>
+        <div class="bar"></div>
+      </div>
+    </nav>
+
+    <!-- SECTION 1: HERO CANVAS ANIMATOR (Pinned during scroll) -->
+    <section class="section hero-sequence" id="hero">
+      <div class="canvas-container">
+        <!-- The canvas that will draw the video frames -->
+        <canvas id="hero-canvas"></canvas>
+      </div>
+      
+      <div class="hero-content">
+        <h3 class="hero-overline">THE PURSUIT OF PERFECTION</h3>
+        <h1 class="hero-title">911 GT3 RS</h1>
+        <p class="hero-subtitle">Performance redefined. Driven by motorsport.</p>
+        <div class="scroll-indicator" style="cursor: pointer;">
+          <span>SCROLL TO EXPLORE</span>
+          <div class="mouse-icon">
+            <div class="wheel"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- THE REST OF THE PAGE (Scrolls upward organically over the unpinned hero) -->
+    <div class="content-bg">
+      <!-- SECTION 2: AERODYNAMICS -->
+      <section class="section detail-left" id="section-aero">
+        <div class="text-block">
+          <div class="block-index">01</div>
+          <h2 class="detail-title">Drag Reduction System</h2>
+          <p class="detail-desc">The ultimate expression of aerodynamic efficiency. For the first time in a production Porsche, a hydraulically adjustable rear wing equipped with F1-derived DRS technology ensures uncompromising downforce.</p>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="stat-value">860 <span class="stat-unit">KG</span></div>
+              <div class="stat-label">Downforce at 285 km/h</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 3: ENGINE -->
+      <section class="section detail-right" id="section-engine">
+        <div class="text-block text-right">
+          <div class="block-index">02</div>
+          <h2 class="detail-title">High-Revving Heart</h2>
+          <p class="detail-desc">A masterpiece of naturally aspirated engineering. The 4.0-litre flat-six engine features motorsport hardware, delivering pure auditory drama as it surges to a breathtaking 9000-rpm redline.</p>
+          <div class="stats-grid grid-right">
+            <div class="stat-item">
+              <div class="stat-value">525 <span class="stat-unit">PS</span></div>
+              <div class="stat-label">Maximum Power</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">3.2 <span class="stat-unit">S</span></div>
+              <div class="stat-label">0-100 km/h</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 4: LIGHTWEIGHT -->
+      <section class="section detail-center" id="section-lightweight">
+        <div class="text-block text-center">
+          <div class="block-index">03</div>
+          <h2 class="detail-title">Weissach Architecture</h2>
+          <p class="detail-desc">Carbon-fibre reinforced plastic dictates the shape of the body, interior, and soul. From the roof to the anti-roll bars, every gram is meticulously shed for absolute peak dynamic response.</p>
+          <div class="stats-grid grid-center">
+            <div class="stat-item">
+              <div class="stat-value">1450 <span class="stat-unit">KG</span></div>
+              <div class="stat-label">Kerb Weight (DIN)</div>
+            </div>
+          </div>
+          <button class="cta-button" onclick="window.open('https://www.porsche.com/international/models/911/911-gt3-rs/', '_blank')">CONFIGURE YOURS</button>
+        </div>
+      </section>
+    </div>
+
+  </main>
+
+  <script>
+    // -------------------------------------------------------------
+    // 1. SMOOTH SCROLLING (Lenis)
+    // -------------------------------------------------------------
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      direction: 'vertical',
+      gestureDirection: 'vertical',
+      smooth: true,
+      mouseMultiplier: 1,
+      smoothTouch: false,
+      touchMultiplier: 2,
+    });
+
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+
+    // -------------------------------------------------------------
+    // 2. CANVAS IMAGE SEQUENCE LOGIC
+    // -------------------------------------------------------------
+    const canvas = document.getElementById("hero-canvas");
+    const canvasContainer = document.querySelector(".canvas-container");
+    const context = canvas.getContext("2d", { alpha: false });
+
+    // CONFIGURATION: 240 frames detected in the ezgif folder
+    const FRAME_COUNT = 240; 
+
+    // Resize Canvas to fit screen initially
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    // Helper to generate padded frame URLs 
+    // Example: ./public/frames/herosection/ezgifimageweb/ezgif-frame-001.jpg
+    const currentFrame = index => (
+      `./public/frames/herosection/ezgifimageweb/ezgif-frame-${index.toString().padStart(3, '0')}.jpg`
+    );
+
+    const images = [];
+    const seqConfig = { frame: 0 }; // GSAP will animate this object
+
+    // Preload frames to prevent stuttering
+    let loadedCount = 0;
+    for (let i = 1; i <= FRAME_COUNT; i++) {
+      const img = new Image();
+      img.src = currentFrame(i);
+      images.push(img);
+      
+      // Attempt to clear Loading Screen faster if first image is ready, or use placeholder logic
+      img.onload = () => {
+        loadedCount++;
+        // Draw the very first frame immediately so canvas isn't blank
+        if(i === 1) renderFrame(0);
+        // Hide loader when at least 25% of sequence or all images load
+        if(loadedCount === Math.min(Math.floor(FRAME_COUNT * 0.25), FRAME_COUNT)) {
+           document.getElementById('loading').classList.add('fade-out');
+        }
+      };
+      img.onerror = () => {
+        // Hide loader even if images fail so user isn't stuck
+        document.getElementById('loading').classList.add('fade-out');
+      }
+    }
+
+    // Function to draw image like background-size: cover
+    function renderFrame(index) {
+      if (!images[index] || !images[index].complete) return;
+      const img = images[index];
+
+      // Reset dimensions just to be safe on window resizes
+      const width = canvas.width;
+      const height = canvas.height;
+
+      const imgRatio = img.width / img.height;
+      const canvasRatio = width / height;
+
+      let drawWidth = width;
+      let drawHeight = height;
+      let offsetX = 0;
+      let offsetY = 0;
+
+      if (canvasRatio > imgRatio) {
+        // Canvas is wider than image, fit to width, crop top/bottom
+        drawHeight = width / imgRatio;
+        offsetY = (height - drawHeight) / 2;
+      } else {
+        // Canvas is taller than image, fit to height, crop left/right
+        drawWidth = height * imgRatio;
+        offsetX = (width - drawWidth) / 2;
+      }
+
+      context.clearRect(0, 0, width, height);
+      context.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+    }
+
+    // Resize Handler
+    window.addEventListener("resize", () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      renderFrame(Math.round(seqConfig.frame));
+    });
+
+    // -------------------------------------------------------------
+    // 3. GSAP SCROLL ANIMATIONS
+    // -------------------------------------------------------------
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Pin the Hero Section and animate the frames
+    // The "+=200%" means the user must scroll 2 heights of the screen 
+    // to scrub through the entire sequence. Then it unpins!
+    gsap.to(seqConfig, {
+      frame: FRAME_COUNT - 1,
+      snap: "frame",
+      ease: "none",
+      scrollTrigger: {
+        trigger: "#hero",
+        start: "top top",
+        end: "+=200%",
+        scrub: 1, // Smoothing value for natural scrub
+        pin: true,
+      },
+      onUpdate: () => renderFrame(Math.round(seqConfig.frame))
+    });
+
+    // Fade out hero text while pinning the background
+    gsap.to('.hero-content', {
+      scrollTrigger: {
+        trigger: '#hero',
+        start: "top top",
+        end: "+=100%", // Fades out halfway through the canvas scrub
+        scrub: 1,
+      },
+      opacity: 0,
+      y: -50,
+    });
+
+    // Content Block Animations (Wait until they scroll into view)
+    const textBlocks = gsap.utils.toArray('.text-block');
+    textBlocks.forEach((block, i) => {
+      gsap.to(block, {
+        scrollTrigger: {
+          trigger: block,
+          start: "top 80%",
+          end: "top 40%",
+          scrub: 1,
+        },
+        opacity: 1,
+        y: 0,
+        ease: "power2.out"
+      });
+    });
+    
+    // -------------------------------------------------------------
+    // 4. MOUSE PARALLAX INTERACTIONS
+    // -------------------------------------------------------------
+    const xToBox = gsap.quickTo('.canvas-container', 'x', { duration: 0.5, ease: "power2.out" });
+    const yToBox = gsap.quickTo('.canvas-container', 'y', { duration: 0.5, ease: "power2.out" });
+    const xToHero = gsap.quickTo('.hero-content', 'x', { duration: 0.8, ease: "power2.out" });
+    const yToHero = gsap.quickTo('.hero-content', 'y', { duration: 0.8, ease: "power2.out" });
+
+    window.addEventListener("mousemove", e => {
+      const xRatio = (e.clientX / window.innerWidth) - 0.5;
+      const yRatio = (e.clientY / window.innerHeight) - 0.5;
+
+      // Move canvas opposite to mouse (feels like depth)
+      xToBox(xRatio * -40);
+      yToBox(yRatio * -40);
+
+      // Move text slightly to add float feeling
+      xToHero(xRatio * -15);
+      yToHero(yRatio * -15);
+    });
+
+    // -------------------------------------------------------------
+    // 5. BUTTON CLICKS & NAVIGATION
+    // -------------------------------------------------------------
+    document.querySelector('.scroll-indicator').addEventListener('click', () => {
+      // Scroll past hero into details section
+      lenis.scrollTo('#section-aero', { offset: -50, duration: 1.5 });
+    });
+
+    document.querySelector('.nav-models').addEventListener('click', () => {
+      lenis.scrollTo('#hero', { duration: 1.5 });
+    });
+    
+    document.querySelector('.nav-motorsport').addEventListener('click', () => {
+      lenis.scrollTo('#section-engine', { offset: -50, duration: 1.5 });
+    });
+
+    document.querySelector('.nav-configure').addEventListener('click', () => {
+      lenis.scrollTo('#section-lightweight', { offset: -50, duration: 1.5 });
+    });
+
+  </script>
+</body>
+</html>
